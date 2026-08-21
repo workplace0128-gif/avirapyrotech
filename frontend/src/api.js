@@ -7,6 +7,8 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Timeout: 15 seconds — prevents requests hanging under high traffic
+  timeout: 15000,
 });
 
 
@@ -24,7 +26,7 @@ api.interceptors.request.use(
   }
 );
 
-// Response Interceptor: Global 401 (Unauthorized) handling
+// Response Interceptor: Global 401 (Unauthorized) handling + timeout messaging
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -38,6 +40,12 @@ api.interceptors.response.use(
         window.location.href = '/admin/login';
       }
     }
+
+    // Friendly message for timeout / network errors
+    if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
+      console.warn('[API] Server is busy or unreachable. Please try again.');
+    }
+
     return Promise.reject(error);
   }
 );

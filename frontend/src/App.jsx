@@ -1,26 +1,45 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-// Admin panel pages & components
+// Admin panel pages & components — lazy loaded for performance
 import Layout from './components/Layout';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Products from './pages/Products';
-import Categories from './pages/Categories';
-import Banners from './pages/Banners';
-import Orders from './pages/Orders';
-import Settings from './pages/Settings';
+const Login       = lazy(() => import('./pages/Login'));
+const Dashboard   = lazy(() => import('./pages/Dashboard'));
+const Products    = lazy(() => import('./pages/Products'));
+const Categories  = lazy(() => import('./pages/Categories'));
+const Banners     = lazy(() => import('./pages/Banners'));
+const Orders      = lazy(() => import('./pages/Orders'));
+const Settings    = lazy(() => import('./pages/Settings'));
 
-// Customer website pages & components
+// Customer website pages & components — lazy loaded for performance
 import CustomerLayout from './components/customer/CustomerLayout';
-import Home from './pages/customer/Home';
-import ProductList from './pages/customer/ProductList';
-import ProductDetail from './pages/customer/ProductDetail';
-import Cart from './pages/customer/Cart';
-import Checkout from './pages/customer/Checkout';
-import OrderSuccess from './pages/customer/OrderSuccess';
-import About from './pages/customer/About';
-import Contact from './pages/customer/Contact';
+const Home          = lazy(() => import('./pages/customer/Home'));
+const ProductList   = lazy(() => import('./pages/customer/ProductList'));
+const ProductDetail = lazy(() => import('./pages/customer/ProductDetail'));
+const Cart          = lazy(() => import('./pages/customer/Cart'));
+const Checkout      = lazy(() => import('./pages/customer/Checkout'));
+const OrderSuccess  = lazy(() => import('./pages/customer/OrderSuccess'));
+const About         = lazy(() => import('./pages/customer/About'));
+const Contact       = lazy(() => import('./pages/customer/Contact'));
+
+// Full-page loading spinner shown while lazy chunks are being fetched
+function PageLoader() {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      minHeight: '100vh', background: '#0f0f0f'
+    }}>
+      <div style={{
+        width: 48, height: 48,
+        border: '4px solid #ff6b00',
+        borderTopColor: 'transparent',
+        borderRadius: '50%',
+        animation: 'spin 0.8s linear infinite'
+      }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
 
 // Admin Protected Route security guard
 function ProtectedRoute({ children }) {
@@ -39,6 +58,7 @@ function CustomerRoute({ children }) {
 function App() {
   return (
     <Router>
+      <Suspense fallback={<PageLoader />}>
       <Routes>
         
         {/* ========================================== */}
@@ -126,6 +146,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>
+      </Suspense>
     </Router>
   );
 }

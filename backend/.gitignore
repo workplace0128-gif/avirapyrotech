@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local Development Secrets — NEVER COMMIT ###
+# Put your local MYSQLPASSWORD and JWT_SECRET here for local dev
+src/main/resources/application-local.properties
+uploads/
+.env
+.env.local

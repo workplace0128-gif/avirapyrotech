@@ -13,6 +13,12 @@ export default function Home() {
     footer_text: 'Quality Sivakasi Fireworks directly delivered to your doorstep!'
   });
   const [activeBannerIdx, setActiveBannerIdx] = useState(0);
+  const [toast, setToast] = useState('');
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 2500);
+  };
 
   const fetchData = async () => {
     try {
@@ -61,16 +67,22 @@ export default function Home() {
     }
     
     localStorage.setItem('cart', JSON.stringify(cart));
-    // Trigger custom event to notify Navbar
     window.dispatchEvent(new Event('cart-updated'));
-    alert(`${product.name} added to cart!`);
+    showToast(`✅ ${product.name} added to cart!`);
   };
 
   return (
-    <div className="space-y-16 pb-16">
-      
+    <div className="space-y-12 pb-16">
+
+      {/* Toast notification */}
+      {toast && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-2xl whitespace-nowrap">
+          {toast}
+        </div>
+      )}
+
       {/* 1. HERO SLIDER BANNER */}
-      <section className="relative h-[65vh] min-h-[400px] bg-gray-900 overflow-hidden shrink-0">
+      <section className="relative h-[55vw] min-h-[280px] max-h-[520px] bg-gray-900 overflow-hidden shrink-0">
         {banners.length > 0 ? (
           banners.map((banner, idx) => (
             <div
@@ -190,7 +202,7 @@ export default function Home() {
             <p className="text-gray-400 text-xs font-semibold">Choose your favorites from gift boxes, ground chakkars, sparklers, and more</p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
             {categories.map((cat) => (
               <Link
                 key={cat.id}
@@ -234,7 +246,7 @@ export default function Home() {
             No products available at this moment. Stay tuned!
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {featuredProducts.map((prod) => {
               const discount = prod.offerPrice && prod.offerPrice < prod.originalPrice
                 ? Math.round(((prod.originalPrice - prod.offerPrice) / prod.originalPrice) * 100)

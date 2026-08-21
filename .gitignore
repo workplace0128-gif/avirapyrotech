@@ -15,6 +15,15 @@ frontend/.env.local
 frontend/.env.*.local
 
 # ===========================
+# SECURITY — Never commit real secrets
+# ===========================
+# .env.production is safe to commit (only VITE_API_URL placeholder)
+# .env.local files should NEVER be committed
+.env.local
+.env.*.local
+backend/uploads/
+
+# ===========================
 # IDE / OS
 # ===========================
 .idea/

@@ -205,6 +205,9 @@ export default function CustomerLayout({ children }) {
               <li>
                 <Link to="/cart" className="hover:text-white transition-colors">Shopping Cart</Link>
               </li>
+              <li>
+                <Link to="/admin" className="hover:text-white transition-colors">Admin Console</Link>
+              </li>
             </ul>
           </div>
 
