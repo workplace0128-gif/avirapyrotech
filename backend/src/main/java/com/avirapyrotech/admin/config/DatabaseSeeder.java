@@ -77,8 +77,8 @@ public class DatabaseSeeder implements CommandLineRunner {
         // Shop settings
         defaultSettings.put("shop_name", "AVIRA PYROTECH");
         defaultSettings.put("shop_logo", "");
-        defaultSettings.put("phone_number", "+91 86103 15901, +91 90921 80927");
-        defaultSettings.put("whatsapp_number", "+91 86103 15901");
+        defaultSettings.put("phone_number", "8610315901, 9092180927");
+        defaultSettings.put("whatsapp_number", "8610315901");
         defaultSettings.put("email", "info@avirapyrotech.com");
         defaultSettings.put("address", "Sivakasi, Tamil Nadu, India");
         defaultSettings.put("google_maps_link", "https://maps.google.com/?q=Sivakasi");

@@ -6,8 +6,8 @@ import api from '../../api';
 export default function CustomerLayout({ children }) {
   const [settings, setSettings] = useState({
     shop_name: 'AVIRA PYROTECH',
-    phone_number: '',
-    whatsapp_number: '',
+    phone_number: '8610315901, 9092180927',
+    whatsapp_number: '8610315901',
     email: '',
     address: '',
     business_hours: '',
@@ -214,6 +214,35 @@ export default function CustomerLayout({ children }) {
           {/* Col 3: Contacts */}
           <div className="space-y-3">
             <h4 className="text-sm font-bold text-orange-400 uppercase tracking-widest mb-4">Contact Info</h4>
+            {(settings.phone_number || '8610315901, 9092180927') && (
+              <div className="text-xs text-gray-400 leading-relaxed font-semibold flex items-start gap-2">
+                <Phone size={16} className="text-red-500 shrink-0 mt-0.5" />
+                <div className="flex flex-col gap-1">
+                  {(settings.phone_number || '8610315901, 9092180927').split(',').map((num, idx) => (
+                    <a
+                      key={idx}
+                      href={`tel:${num.trim().replace(/\s+/g, '')}`}
+                      className="hover:text-white transition-colors"
+                    >
+                      {num.trim()}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+            {settings.whatsapp_number && (
+              <p className="text-xs text-gray-400 font-semibold flex items-center gap-2">
+                <MessageSquare size={16} className="text-green-500 shrink-0" />
+                <a
+                  href={`https://wa.me/${settings.whatsapp_number.replace(/[^\d]/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                >
+                  {settings.whatsapp_number}
+                </a>
+              </p>
+            )}
             {settings.address && (
               <p className="text-xs text-gray-400 leading-relaxed font-semibold flex items-start gap-2">
                 <MapPin size={16} className="text-red-500 shrink-0 mt-0.5" />

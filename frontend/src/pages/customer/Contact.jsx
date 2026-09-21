@@ -5,8 +5,8 @@ import { Phone, MessageSquare, MapPin, Mail, Clock, ShieldAlert } from 'lucide-r
 export default function Contact() {
   const [settings, setSettings] = useState({
     shop_name: 'AVIRA PYROTECH',
-    phone_number: '',
-    whatsapp_number: '',
+    phone_number: '8610315901, 9092180927',
+    whatsapp_number: '8610315901',
     email: '',
     address: '',
     google_maps_link: '',

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../api';
-import { ShoppingBag, ArrowLeft, CreditCard, CheckCircle2 } from 'lucide-react';
+import { ShoppingBag, ArrowLeft, CreditCard, CheckCircle2, MessageSquare, Send } from 'lucide-react';
 
 export default function Checkout() {
   const [cart, setCart]   = useState([]);
@@ -33,17 +33,106 @@ export default function Checkout() {
   const setField = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
   const getSubtotal = () => cart.reduce((s, i) => s + i.price * i.quantity, 0);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const validateForm = () => {
     const { customerName, mobileNumber, address, district, pincode } = form;
-    if (!customerName.trim() || !mobileNumber.trim() || !address.trim() || !district.trim() || !pincode.trim()) {
+    if (!customerName.trim() || !mobileNumber.trim() || !address.trim() || !district.trim()) {
       setError('Please fill all required fields (*)');
-      return;
+      return false;
     }
     if (mobileNumber.replace(/\D/g, '').length < 10) {
       setError('Enter a valid 10-digit mobile number');
-      return;
+      return false;
     }
+    return true;
+  };
+
+  // Helper to build WhatsApp Message Link
+  const buildWhatsAppUrl = () => {
+    const targetNumber = "918610315901";
+    const fullAddress = `${form.address.trim()}${form.landmark.trim() ? ', Near ' + form.landmark.trim() : ''}, ${form.district.trim()}${form.pincode.trim() ? ' - ' + form.pincode.trim() : ''}`;
+
+    let msg = `*NEW ORDER - AVIRA PYROTECH*\n`;
+    msg += `--------------------------------\n`;
+    msg += `*Customer Details:*\n`;
+    msg += `Name: ${form.customerName.trim()}\n`;
+    msg += `Phone: ${form.mobileNumber.trim()}\n`;
+    msg += `Delivery Address: ${fullAddress}\n`;
+    msg += `--------------------------------\n`;
+    msg += `*Order Items:*\n`;
+
+    cart.forEach((item, idx) => {
+      const itemTotal = (item.price * item.quantity).toLocaleString('en-IN');
+      msg += `${idx + 1}. ${item.product.name} x ${item.quantity} = ₹${itemTotal}\n`;
+    });
+
+    msg += `--------------------------------\n`;
+    msg += `*Total Amount: ₹${getSubtotal().toLocaleString('en-IN')}*\n`;
+    msg += `--------------------------------\n`;
+    msg += `Please confirm stock availability and share GPay details for payment. Thank you!`;
+
+    return `https://wa.me/${targetNumber}?text=${encodeURIComponent(msg)}`;
+  };
+
+  // Submit via WhatsApp
+  const handleWhatsAppCheckout = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setSubmitting(true);
+    setError('');
+
+    const whatsappUrl = buildWhatsAppUrl();
+
+    try {
+      const payload = {
+        customerName:  form.customerName.trim(),
+        mobileNumber:  form.mobileNumber.trim(),
+        address:       `${form.address.trim()}, ${form.district.trim()}`,
+        landmark:      form.landmark.trim() || null,
+        district:      form.district.trim(),
+        pincode:       form.pincode.trim() || null,
+        customerNotes: form.customerNotes.trim() ? `[WhatsApp Order] ${form.customerNotes.trim()}` : '[WhatsApp Order]',
+        totalAmount:   getSubtotal(),
+        orderItems: cart.map((i) => ({
+          product:  { id: i.product.id },
+          quantity: i.quantity,
+          price:    i.price,
+        })),
+      };
+
+      // Save order to DB as well
+      let orderId = 'WA';
+      try {
+        const response = await api.post('/orders', payload);
+        orderId = response.data.id;
+      } catch (err) {
+        console.warn('Backend order save deferred, launching WhatsApp directly:', err);
+      }
+
+      // Open WhatsApp chat in new window
+      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+
+      // Clear local cart state
+      localStorage.removeItem('cart');
+      window.dispatchEvent(new Event('cart-updated'));
+
+      // Redirect to Order Success page
+      navigate(`/order-success?id=${orderId}&name=${encodeURIComponent(form.customerName)}&total=${getSubtotal()}&whatsapp=true`);
+    } catch (err) {
+      console.error(err);
+      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      localStorage.removeItem('cart');
+      window.dispatchEvent(new Event('cart-updated'));
+      navigate(`/order-success?name=${encodeURIComponent(form.customerName)}&total=${getSubtotal()}&whatsapp=true`);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Submit Standard Web Order
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
     setSubmitting(true);
     setError('');
@@ -54,7 +143,7 @@ export default function Checkout() {
         address:       form.address.trim(),
         landmark:      form.landmark.trim() || null,
         district:      form.district.trim(),
-        pincode:       form.pincode.trim(),
+        pincode:       form.pincode.trim() || null,
         customerNotes: form.customerNotes.trim() || null,
         totalAmount:   getSubtotal(),
         orderItems: cart.map((i) => ({
@@ -97,7 +186,7 @@ export default function Checkout() {
           Back to Cart
         </Link>
         <h1 className="text-2xl sm:text-3xl font-black text-gray-900">Checkout</h1>
-        <p className="text-xs text-gray-400 font-medium mt-0.5">Fill your delivery details and place the order.</p>
+        <p className="text-xs text-gray-400 font-medium mt-0.5">Fill your delivery details to complete your order via WhatsApp or Online Direct.</p>
       </div>
 
       {/* Error banner */}
@@ -113,12 +202,12 @@ export default function Checkout() {
 
         {/* ── Delivery Form ── */}
         <div className="flex-1 bg-white rounded-3xl border border-gray-150 p-5 sm:p-7 shadow-sm">
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form className="space-y-5">
             <h2 className="font-extrabold text-sm text-gray-700 border-b border-gray-100 pb-3">
               Delivery Information
             </h2>
 
-            {/* Name + Phone — always 1 col on mobile, 2 col on sm+ */}
+            {/* Name + Phone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label="Full Name" required>
                 <input
@@ -134,7 +223,7 @@ export default function Checkout() {
               <Field label="Mobile Number" required>
                 <input
                   type="tel"
-                  placeholder="e.g. 9876543210"
+                  placeholder="e.g. 8610315901"
                   value={form.mobileNumber}
                   onChange={setField('mobileNumber')}
                   disabled={submitting}
@@ -145,10 +234,10 @@ export default function Checkout() {
             </div>
 
             {/* Address */}
-            <Field label="Shipping Address" required>
+            <Field label="Delivery City / Address" required>
               <textarea
                 rows={3}
-                placeholder="Door No, Street name, Area…"
+                placeholder="Door No, Street name, Area, City…"
                 value={form.address}
                 onChange={setField('address')}
                 disabled={submitting}
@@ -161,7 +250,7 @@ export default function Checkout() {
             <Field label="Landmark (Optional)">
               <input
                 type="text"
-                placeholder="e.g. Near Vinayagar Temple"
+                placeholder="e.g. Near Bus Stand / Temple"
                 value={form.landmark}
                 onChange={setField('landmark')}
                 disabled={submitting}
@@ -171,10 +260,10 @@ export default function Checkout() {
 
             {/* District + Pincode */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="District" required>
+              <Field label="District / Town" required>
                 <input
                   type="text"
-                  placeholder="e.g. Virudhunagar"
+                  placeholder="e.g. Virudhunagar / Sivakasi"
                   value={form.district}
                   onChange={setField('district')}
                   disabled={submitting}
@@ -182,7 +271,7 @@ export default function Checkout() {
                   className={inputCls}
                 />
               </Field>
-              <Field label="Pincode" required>
+              <Field label="Pincode (Optional)">
                 <input
                   type="text"
                   inputMode="numeric"
@@ -190,7 +279,6 @@ export default function Checkout() {
                   value={form.pincode}
                   onChange={setField('pincode')}
                   disabled={submitting}
-                  required
                   className={inputCls}
                 />
               </Field>
@@ -209,38 +297,54 @@ export default function Checkout() {
             </Field>
 
             {/* Payment note */}
-            <div className="bg-orange-50 border border-orange-200 p-4 rounded-2xl flex gap-3">
-              <CreditCard size={18} className="shrink-0 text-orange-600 mt-0.5" />
+            <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl flex gap-3">
+              <MessageSquare size={20} className="shrink-0 text-emerald-600 mt-0.5" />
               <div className="text-xs font-medium space-y-0.5">
-                <p className="font-extrabold text-orange-900">Cash on Delivery / Store Pickup</p>
-                <p className="text-orange-700 leading-relaxed">
-                  No online payment needed. Our team will call you to confirm delivery. Pay in cash or UPI on delivery.
+                <p className="font-extrabold text-emerald-900">Direct WhatsApp Order Confirmation</p>
+                <p className="text-emerald-700 leading-relaxed">
+                  Clicking <b>Order via WhatsApp</b> generates a formatted order summary directly in WhatsApp to owner line (+91 8610315901). You can instantly confirm stock & pay via GPay/PhonePe!
                 </p>
               </div>
             </div>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white font-black rounded-2xl shadow-lg shadow-red-500/20 active:scale-[0.98] transition-all text-sm cursor-pointer disabled:opacity-50"
-            >
-              {submitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Placing Order…</span>
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 size={16} />
-                  <span>Place Order — ₹{getSubtotal().toLocaleString('en-IN')}</span>
-                </>
-              )}
-            </button>
+            {/* Action Buttons: Primary WhatsApp + Secondary Website Order */}
+            <div className="space-y-3 pt-2">
+              {/* PRIMARY WHATSAPP BUTTON */}
+              <button
+                type="button"
+                onClick={handleWhatsAppCheckout}
+                disabled={submitting}
+                className="w-full flex items-center justify-center gap-2.5 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl shadow-lg shadow-emerald-600/25 active:scale-[0.98] transition-all text-sm cursor-pointer disabled:opacity-50"
+              >
+                {submitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Preparing WhatsApp Order…</span>
+                  </>
+                ) : (
+                  <>
+                    <MessageSquare size={18} />
+                    <span>Order via WhatsApp — ₹{getSubtotal().toLocaleString('en-IN')}</span>
+                  </>
+                )}
+              </button>
+
+              {/* SECONDARY STANDARD WEBSITE BUTTON */}
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-2xl active:scale-[0.98] transition-all text-xs cursor-pointer disabled:opacity-50"
+              >
+                <CheckCircle2 size={15} />
+                <span>Place Order Directly on Website</span>
+              </button>
+            </div>
+
           </form>
         </div>
 
-        {/* ── Order Summary (visible below form on mobile, right sidebar on desktop) ── */}
+        {/* ── Order Summary ── */}
         <div className="lg:w-72 bg-white rounded-3xl border border-gray-150 shadow-sm p-5 h-fit space-y-4 lg:sticky lg:top-20">
           <h3 className="font-extrabold text-sm text-gray-800 border-b border-gray-100 pb-3 flex items-center gap-2">
             <ShoppingBag size={14} className="text-red-600" />
@@ -263,7 +367,7 @@ export default function Checkout() {
 
           <div className="border-t border-gray-100 pt-3 flex justify-between text-sm font-black text-gray-900">
             <span>Total</span>
-            <span className="text-red-600">₹{getSubtotal().toLocaleString('en-IN')}</span>
+            <span className="text-emerald-600">₹{getSubtotal().toLocaleString('en-IN')}</span>
           </div>
         </div>
 
@@ -271,3 +375,4 @@ export default function Checkout() {
     </div>
   );
 }
+

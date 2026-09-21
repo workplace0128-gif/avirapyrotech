@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Trash2, ShoppingBag, Plus, Minus, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Trash2, ShoppingBag, Plus, Minus, ArrowRight, ArrowLeft, MessageSquare } from 'lucide-react';
 
 export default function Cart() {
   const [cart, setCart] = useState([]);
@@ -225,13 +225,22 @@ export default function Cart() {
             <span className="text-red-600">₹{getSubtotal().toLocaleString('en-IN')}</span>
           </div>
         </div>
-        <button
-          onClick={() => navigate('/checkout')}
-          className="w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white font-bold rounded-2xl shadow-lg shadow-red-500/20 active:scale-[0.98] transition-all text-sm cursor-pointer"
-        >
-          <span>Proceed to Checkout</span>
-          <ArrowRight size={16} />
-        </button>
+        <div className="space-y-2.5 pt-2">
+          <button
+            onClick={() => navigate('/checkout')}
+            className="w-full flex items-center justify-center gap-2.5 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl shadow-lg shadow-emerald-600/20 active:scale-[0.98] transition-all text-sm cursor-pointer"
+          >
+            <MessageSquare size={18} />
+            <span>Order via WhatsApp — ₹{getSubtotal().toLocaleString('en-IN')}</span>
+          </button>
+          <button
+            onClick={() => navigate('/checkout')}
+            className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-2xl active:scale-[0.98] transition-all text-xs cursor-pointer"
+          >
+            <span>Standard Checkout</span>
+            <ArrowRight size={14} />
+          </button>
+        </div>
       </div>
 
     </div>
