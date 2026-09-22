@@ -38,3 +38,5 @@ src/main/resources/application-local.properties
 uploads/
 .env
 .env.local
+data/
+*.mv.db
