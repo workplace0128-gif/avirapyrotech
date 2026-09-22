@@ -1,9 +1,13 @@
 import axios from 'axios';
 
-// In production (Vercel), VITE_API_URL = https://your-backend.railway.app/api
-// In development, it falls back to '/api' which vite.config.js proxies to localhost:8080
+// In production (Vercel), uses VITE_API_URL or defaults directly to live Railway URL
+// In development, falls back to '/api' which vite.config.js proxies locally
+const defaultBaseUrl = import.meta.env.DEV 
+  ? '/api' 
+  : 'https://avirapyrotech-production.up.railway.app/api';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: (import.meta.env.VITE_API_URL || defaultBaseUrl).replace(/\/+$/, ''),
   headers: {
     'Content-Type': 'application/json',
   },
