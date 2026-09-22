@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -27,7 +28,7 @@ public class SettingService {
 
     public String getSetting(String key, String defaultValue) {
         return settingRepository.findByConfigKey(key)
-                .map(Setting::getConfigValue)
+                .map(s -> s.getConfigValue())
                 .orElse(defaultValue);
     }
 
@@ -39,10 +40,10 @@ public class SettingService {
             setting.setConfigValue(value);
             settingRepository.save(setting);
         } else {
-            Setting setting = Setting.builder()
+            Setting setting = Objects.requireNonNull(Setting.builder()
                     .configKey(key)
                     .configValue(value)
-                    .build();
+                    .build());
             settingRepository.save(setting);
         }
     }

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class OrderService {
@@ -65,7 +66,7 @@ public class OrderService {
         // Calculate total and deduct stock
         double total = 0;
         for (OrderItem item : order.getOrderItems()) {
-            Product product = productRepository.findById(item.getProduct().getId())
+            Product product = productRepository.findById(Objects.requireNonNull(item.getProduct().getId()))
                     .orElseThrow(() -> new IllegalArgumentException("Product not found: " + item.getProduct().getId()));
 
             if (product.getStockQuantity() < item.getQuantity()) {
@@ -95,7 +96,7 @@ public class OrderService {
 
     @Transactional
     public Order updateOrderStatus(Long id, String status) {
-        Order order = orderRepository.findById(id)
+        Order order = orderRepository.findById(Objects.requireNonNull(id))
                 .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
         String oldStatus = order.getStatus();
@@ -132,12 +133,12 @@ public class OrderService {
 
     @Transactional
     public void deleteOrder(Long id) {
-        Order order = orderRepository.findById(id)
+        Order order = orderRepository.findById(Objects.requireNonNull(id))
                 .orElseThrow(() -> new IllegalArgumentException("Order not found"));
         
         // If order was active (not cancelled), we might want to restore stock, 
         // but typically database delete is destructive. Let's just delete the order.
-        orderRepository.delete(order);
+        orderRepository.delete(Objects.requireNonNull(order));
     }
 
     public Map<String, Object> getDashboardStats() {

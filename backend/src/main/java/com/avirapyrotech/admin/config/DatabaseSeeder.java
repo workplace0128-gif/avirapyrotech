@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Component
 public class DatabaseSeeder implements CommandLineRunner {
@@ -39,11 +40,11 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private void seedAdminUser() {
         if (userRepository.count() == 0) {
-            User admin = User.builder()
+            User admin = Objects.requireNonNull(User.builder()
                     .username("admin")
                     .password(passwordEncoder.encode("admin123"))
                     .active(true)
-                    .build();
+                    .build());
             userRepository.save(admin);
             System.out.println("========== DATABASE SEEDED: Default admin created (admin / admin123) ==========");
         }
@@ -61,10 +62,10 @@ public class DatabaseSeeder implements CommandLineRunner {
             );
 
             for (String catName : defaultCats) {
-                Category category = Category.builder()
+                Category category = Objects.requireNonNull(Category.builder()
                         .name(catName)
                         .imagePath(null) // Optional category image
-                        .build();
+                        .build());
                 categoryRepository.save(category);
             }
             System.out.println("========== DATABASE SEEDED: Default cracker categories created ==========");

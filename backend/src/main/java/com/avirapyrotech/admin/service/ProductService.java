@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -60,7 +61,7 @@ public class ProductService {
     }
 
     public Optional<Product> getProductById(Long id) {
-        return productRepository.findById(id);
+        return productRepository.findById(Objects.requireNonNull(id));
     }
 
     @Transactional
@@ -71,7 +72,7 @@ public class ProductService {
         
         // Ensure category is attached correctly
         if (product.getCategory() != null && product.getCategory().getId() != null) {
-            Category category = categoryRepository.findById(product.getCategory().getId())
+            Category category = categoryRepository.findById(Objects.requireNonNull(product.getCategory().getId()))
                     .orElseThrow(() -> new IllegalArgumentException("Category not found"));
             product.setCategory(category);
         }
@@ -84,7 +85,7 @@ public class ProductService {
 
     @Transactional
     public Product updateProduct(Long id, Product updatedProduct) {
-        Product product = productRepository.findById(id)
+        Product product = productRepository.findById(Objects.requireNonNull(id))
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
         if (productRepository.existsByProductCodeAndIdNot(updatedProduct.getProductCode(), id)) {
@@ -100,7 +101,7 @@ public class ProductService {
         product.setFeatured(updatedProduct.isFeatured());
         
         if (updatedProduct.getCategory() != null && updatedProduct.getCategory().getId() != null) {
-            Category category = categoryRepository.findById(updatedProduct.getCategory().getId())
+            Category category = categoryRepository.findById(Objects.requireNonNull(updatedProduct.getCategory().getId()))
                     .orElseThrow(() -> new IllegalArgumentException("Category not found"));
             product.setCategory(category);
         }
@@ -123,7 +124,7 @@ public class ProductService {
 
     @Transactional
     public Product duplicateProduct(Long id) {
-        Product original = productRepository.findById(id)
+        Product original = productRepository.findById(Objects.requireNonNull(id))
                 .orElseThrow(() -> new IllegalArgumentException("Original product not found"));
 
         // Generate unique code
@@ -147,12 +148,12 @@ public class ProductService {
                 .imagePath(original.getImagePath()) // Copy the image URL/path (sharing image URL in DB is safe)
                 .build();
 
-        return productRepository.save(duplicate);
+        return productRepository.save(Objects.requireNonNull(duplicate));
     }
 
     @Transactional
     public void deleteProduct(Long id) {
-        Product product = productRepository.findById(id)
+        Product product = productRepository.findById(Objects.requireNonNull(id))
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
         // Delete associated image file

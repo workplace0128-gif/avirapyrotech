@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -22,7 +23,7 @@ public class CategoryService {
     }
 
     public Optional<Category> getCategoryById(Long id) {
-        return categoryRepository.findById(id);
+        return categoryRepository.findById(Objects.requireNonNull(id));
     }
 
     @Transactional
@@ -35,7 +36,7 @@ public class CategoryService {
 
     @Transactional
     public Category updateCategory(Long id, Category updatedCategory) {
-        Category category = categoryRepository.findById(id)
+        Category category = categoryRepository.findById(Objects.requireNonNull(id))
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
 
         if (!category.getName().equalsIgnoreCase(updatedCategory.getName()) &&
@@ -61,7 +62,7 @@ public class CategoryService {
 
     @Transactional
     public void deleteCategory(Long id) {
-        Category category = categoryRepository.findById(id)
+        Category category = categoryRepository.findById(Objects.requireNonNull(id))
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
         
         // Delete image file if exists

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -26,7 +27,7 @@ public class BannerService {
     }
 
     public Optional<Banner> getBannerById(Long id) {
-        return bannerRepository.findById(id);
+        return bannerRepository.findById(Objects.requireNonNull(id));
     }
 
     @Transactional
@@ -39,7 +40,7 @@ public class BannerService {
 
     @Transactional
     public Banner updateBanner(Long id, Banner updatedBanner) {
-        Banner banner = bannerRepository.findById(id)
+        Banner banner = bannerRepository.findById(Objects.requireNonNull(id))
                 .orElseThrow(() -> new IllegalArgumentException("Banner not found"));
 
         banner.setTitle(updatedBanner.getTitle());
@@ -63,7 +64,7 @@ public class BannerService {
 
     @Transactional
     public void deleteBanner(Long id) {
-        Banner banner = bannerRepository.findById(id)
+        Banner banner = bannerRepository.findById(Objects.requireNonNull(id))
                 .orElseThrow(() -> new IllegalArgumentException("Banner not found"));
 
         // Delete local image file
