@@ -15,6 +15,17 @@ public class WebConfig implements WebMvcConfigurer {
     private String uploadDir;
 
     @Override
+    public void addCorsMappings(@NonNull org.springframework.web.servlet.config.annotation.CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOriginPatterns("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+                .allowedHeaders("*")
+                .exposedHeaders("Authorization")
+                .allowCredentials(true)
+                .maxAge(3600);
+    }
+
+    @Override
     public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
         Path uploadDirPath = Paths.get(uploadDir).toAbsolutePath().normalize();
         
