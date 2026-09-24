@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../../api';
+import api, { getImageUrl } from '../../api';
 import { Sparkles, ArrowRight, ShieldCheck, Flame, ShoppingBag, Truck } from 'lucide-react';
 
 export default function Home() {
@@ -94,7 +94,7 @@ export default function Home() {
               {/* Background Cover Image */}
               <div className="absolute inset-0 bg-black/60 z-10"></div>
               <img
-                src={banner.imagePath}
+                src={getImageUrl(banner.imagePath)}
                 alt={banner.title || 'AVIRA PYROTECH'}
                 className="absolute inset-0 w-full h-full object-cover select-none"
               />
@@ -211,7 +211,7 @@ export default function Home() {
               >
                 <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-50 flex items-center justify-center border border-gray-100">
                   {cat.imagePath ? (
-                    <img src={cat.imagePath} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    <img src={getImageUrl(cat.imagePath)} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                   ) : (
                     <Flame size={24} className="text-gray-400" />
                   )}
@@ -262,7 +262,7 @@ export default function Home() {
                   <div className="h-48 bg-gray-50 border-b border-gray-100 flex items-center justify-center relative overflow-hidden">
                     {prod.imagePath ? (
                       <img
-                        src={prod.imagePath}
+                        src={getImageUrl(prod.imagePath)}
                         alt={prod.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />

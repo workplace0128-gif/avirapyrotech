@@ -19,6 +19,9 @@ export default function Login() {
       setUsername(savedUser);
       setRememberMe(true);
     }
+    if (window.location.search.includes('expired=true')) {
+      setError('Your session has expired. Please log in again to continue.');
+    }
   }, []);
 
   const handleSubmit = async (e) => {

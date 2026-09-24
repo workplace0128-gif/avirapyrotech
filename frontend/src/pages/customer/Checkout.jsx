@@ -3,6 +3,20 @@ import { useNavigate, Link } from 'react-router-dom';
 import api from '../../api';
 import { ShoppingBag, ArrowLeft, CreditCard, CheckCircle2, MessageSquare, Send } from 'lucide-react';
 
+/* ── Reusable input field wrapper (defined outside Checkout to preserve input focus across keystrokes) ── */
+function Field({ label, required, children }) {
+  return (
+    <div className="space-y-1.5">
+      <label className="block text-xs font-bold text-gray-500">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+const inputCls = "w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 text-sm font-medium transition-colors disabled:opacity-60";
+
 export default function Checkout() {
   const [cart, setCart]   = useState([]);
   const navigate          = useNavigate();
@@ -163,18 +177,6 @@ export default function Checkout() {
       setSubmitting(false);
     }
   };
-
-  /* ── Reusable input field ───────────────────────── */
-  const Field = ({ label, required, children }) => (
-    <div className="space-y-1.5">
-      <label className="block text-xs font-bold text-gray-500">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      {children}
-    </div>
-  );
-
-  const inputCls = "w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 text-sm font-medium transition-colors disabled:opacity-60";
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">

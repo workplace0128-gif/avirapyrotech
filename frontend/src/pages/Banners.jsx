@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api';
+import api, { getImageUrl } from '../api';
 import { Plus, Edit2, Trash2, X, Upload, AlertCircle, Eye, EyeOff, Image as ImageIcon } from 'lucide-react';
 
 export default function Banners() {
@@ -128,7 +128,10 @@ export default function Banners() {
       fetchBanners();
     } catch (err) {
       console.error(err);
-      setFormError(err.response?.data || 'Failed to save banner.');
+      const errMsg = typeof err.response?.data === 'string'
+        ? err.response.data
+        : (err.response?.data?.message || err.message || 'Failed to save banner.');
+      setFormError(errMsg);
     } finally {
       setSubmitting(false);
     }
@@ -202,7 +205,7 @@ export default function Banners() {
               {/* Banner Image */}
               <div className="h-56 bg-gray-100 relative overflow-hidden flex items-center justify-center border-b border-gray-100">
                 <img
-                  src={banner.imagePath}
+                  src={getImageUrl(banner.imagePath)}
                   alt={banner.title || 'Banner'}
                   className="w-full h-full object-cover"
                 />
@@ -364,7 +367,7 @@ export default function Banners() {
                 {imagePreview || existingImagePath ? (
                   <div className="relative w-full h-36 border border-gray-250 rounded-xl overflow-hidden bg-gray-50">
                     <img
-                      src={imagePreview || existingImagePath}
+                      src={imagePreview || getImageUrl(existingImagePath)}
                       alt="Banner Preview"
                       className="w-full h-full object-cover"
                     />

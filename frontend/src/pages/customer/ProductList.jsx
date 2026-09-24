@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import api from '../../api';
+import api, { getImageUrl } from '../../api';
 import { Search, SlidersHorizontal, Flame, X, ChevronDown } from 'lucide-react';
 
 export default function ProductList() {
@@ -76,7 +76,7 @@ export default function ProductList() {
   };
 
   /* ─── Filter panel (shared between sidebar & drawer) ─── */
-  const FilterPanel = () => (
+  const renderFilterPanel = () => (
     <div className="space-y-6">
       <div className="flex items-center gap-2 text-gray-800 border-b border-gray-100 pb-3">
         <SlidersHorizontal size={16} className="text-red-600" />
@@ -187,7 +187,7 @@ export default function ProductList() {
                 <X size={20} />
               </button>
             </div>
-            <FilterPanel />
+            {renderFilterPanel()}
             <button
               onClick={() => setFilterOpen(false)}
               className="w-full py-3 bg-gradient-to-r from-red-600 to-orange-500 text-white font-bold rounded-2xl text-sm cursor-pointer"
@@ -203,7 +203,7 @@ export default function ProductList() {
 
         {/* Desktop sidebar */}
         <aside className="hidden lg:block bg-white p-6 rounded-2xl border border-gray-150 shadow-sm h-fit sticky top-20">
-          <FilterPanel />
+          {renderFilterPanel()}
         </aside>
 
         {/* Products grid */}
@@ -234,7 +234,7 @@ export default function ProductList() {
                     <div className="h-36 sm:h-44 bg-gray-50 border-b border-gray-100 flex items-center justify-center relative overflow-hidden">
                       {prod.imagePath ? (
                         <img
-                          src={prod.imagePath}
+                          src={getImageUrl(prod.imagePath)}
                           alt={prod.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />

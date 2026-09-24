@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api';
+import api, { getImageUrl } from '../api';
 import { Plus, Edit2, Trash2, X, Upload, AlertCircle, Folder } from 'lucide-react';
 
 export default function Categories() {
@@ -116,7 +116,10 @@ export default function Categories() {
       fetchCategories();
     } catch (err) {
       console.error(err);
-      setFormError(err.response?.data || 'Failed to save category. Make sure the name is unique.');
+      const errMsg = typeof err.response?.data === 'string'
+        ? err.response.data
+        : (err.response?.data?.message || err.message || 'Failed to save category. Make sure the name is unique.');
+      setFormError(errMsg);
     } finally {
       setSubmitting(false);
     }
@@ -174,7 +177,7 @@ export default function Categories() {
               <div className="h-40 bg-gray-100 relative overflow-hidden flex items-center justify-center border-b border-gray-100">
                 {category.imagePath ? (
                   <img
-                    src={category.imagePath}
+                    src={getImageUrl(category.imagePath)}
                     alt={category.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -262,7 +265,7 @@ export default function Categories() {
                 {imagePreview || existingImagePath ? (
                   <div className="relative w-36 h-36 border border-gray-250 rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center">
                     <img
-                      src={imagePreview || existingImagePath}
+                      src={imagePreview || getImageUrl(existingImagePath)}
                       alt="Cover Preview"
                       className="w-full h-full object-cover"
                     />

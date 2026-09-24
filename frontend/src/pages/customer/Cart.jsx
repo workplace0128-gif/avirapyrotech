@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, ShoppingBag, Plus, Minus, ArrowRight, ArrowLeft, MessageSquare } from 'lucide-react';
+import { getImageUrl } from '../../api';
 
 export default function Cart() {
   const [cart, setCart] = useState([]);
@@ -107,7 +108,7 @@ export default function Cart() {
             {/* Thumbnail */}
             <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 shrink-0 flex items-center justify-center">
               {item.product.imagePath ? (
-                <img src={item.product.imagePath} alt={item.product.name} className="w-full h-full object-cover" />
+                <img src={getImageUrl(item.product.imagePath)} alt={item.product.name} className="w-full h-full object-cover" />
               ) : (
                 <ShoppingBag size={22} className="text-gray-300" />
               )}
@@ -175,7 +176,7 @@ export default function Cart() {
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gray-50 border border-gray-100 rounded-lg overflow-hidden shrink-0 flex items-center justify-center">
                       {item.product.imagePath ? (
-                        <img src={item.product.imagePath} alt={item.product.name} className="w-full h-full object-cover" />
+                        <img src={getImageUrl(item.product.imagePath)} alt={item.product.name} className="w-full h-full object-cover" />
                       ) : (
                         <ShoppingBag size={18} className="text-gray-300" />
                       )}

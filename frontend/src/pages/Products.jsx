@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api';
+import api, { getImageUrl } from '../api';
 import {
   Search,
   Plus,
@@ -268,7 +268,10 @@ export default function Products() {
       fetchProducts();
     } catch (err) {
       console.error(err);
-      setFormError(err.response?.data || 'Failed to save product. Please make sure the product code is unique.');
+      const errMsg = typeof err.response?.data === 'string'
+        ? err.response.data
+        : (err.response?.data?.message || err.message || 'Failed to save product. Please try again.');
+      setFormError(errMsg);
     } finally {
       setSubmitting(false);
     }
@@ -393,7 +396,7 @@ export default function Products() {
                         <div className="w-12 h-12 rounded-xl bg-gray-100 border border-gray-150 overflow-hidden shrink-0 flex items-center justify-center">
                           {product.imagePath ? (
                             <img
-                              src={product.imagePath}
+                              src={getImageUrl(product.imagePath)}
                               alt={product.name}
                               className="w-full h-full object-cover"
                             />
@@ -661,7 +664,7 @@ export default function Products() {
                 {imagePreview || existingImagePath ? (
                   <div className="relative w-48 h-48 border border-gray-250 rounded-2xl overflow-hidden bg-gray-55/30">
                     <img
-                      src={imagePreview || existingImagePath}
+                      src={imagePreview || getImageUrl(existingImagePath)}
                       alt="Preview"
                       className="w-full h-full object-cover"
                     />

@@ -30,7 +30,12 @@ public class FileStorageService {
     private static final String[] SUPPORTED_EXTENSIONS = {"jpg", "jpeg", "png", "webp"};
 
     public FileStorageService(@Value("${app.upload.dir:./uploads}") String uploadDir) {
-        this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
+        Path path = Paths.get(uploadDir);
+        // Automatically use Railway volume mounted at /uploads if using default relative path
+        if (!path.isAbsolute() && Files.exists(Paths.get("/uploads")) && Files.isDirectory(Paths.get("/uploads"))) {
+            path = Paths.get("/uploads");
+        }
+        this.fileStorageLocation = path.toAbsolutePath().normalize();
         try {
             Files.createDirectories(this.fileStorageLocation);
             Files.createDirectories(this.fileStorageLocation.resolve("products"));

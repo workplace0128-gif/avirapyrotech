@@ -8,9 +8,9 @@ export default function CustomerLayout({ children }) {
     shop_name: 'AVIRA PYROTECH',
     phone_number: '8610315901, 9092180927',
     whatsapp_number: '8610315901',
-    email: '',
-    address: '',
-    business_hours: '',
+    email: 'info@avirapyrotech.com',
+    address: '112, Paraipatti, Sattur Road, Sivakasi - 626189',
+    business_hours: '9:00 AM - 8:00 PM',
     footer_text: 'Premium Sivakasi Fireworks & Crackers',
     copyright_text: '© 2026 Avira Pyrotech. All Rights Reserved.'
   });

@@ -81,8 +81,8 @@ public class DatabaseSeeder implements CommandLineRunner {
         defaultSettings.put("phone_number", "8610315901, 9092180927");
         defaultSettings.put("whatsapp_number", "8610315901");
         defaultSettings.put("email", "info@avirapyrotech.com");
-        defaultSettings.put("address", "Sivakasi, Tamil Nadu, India");
-        defaultSettings.put("google_maps_link", "https://maps.google.com/?q=Sivakasi");
+        defaultSettings.put("address", "112, Paraipatti, Sattur Road, Sivakasi - 626189, Tamil Nadu, India");
+        defaultSettings.put("google_maps_link", "https://www.google.com/maps/search/?api=1&query=112+Paraipatti+Sattur+Road+Sivakasi+626189");
         defaultSettings.put("business_hours", "9:00 AM - 8:00 PM");
         defaultSettings.put("social_facebook", "https://facebook.com/avirapyrotech");
         defaultSettings.put("social_instagram", "https://instagram.com/avirapyrotech");

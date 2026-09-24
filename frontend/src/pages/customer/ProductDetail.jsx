@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import api from '../../api';
+import api, { getImageUrl } from '../../api';
 import { Flame, ShoppingCart, ArrowLeft, Plus, Minus, Info } from 'lucide-react';
 
 export default function ProductDetail() {
@@ -108,7 +108,7 @@ export default function ProductDetail() {
         <div className="bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-center p-6 min-h-[300px] md:min-h-[400px] relative overflow-hidden">
           {product.imagePath ? (
             <img
-              src={product.imagePath}
+              src={getImageUrl(product.imagePath)}
               alt={product.name}
               className="max-h-[350px] object-contain rounded-xl select-none"
             />

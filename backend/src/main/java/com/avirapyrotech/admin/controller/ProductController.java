@@ -51,16 +51,17 @@ public class ProductController {
             @RequestParam("offerPrice") Double offerPrice,
             @RequestParam("stockQuantity") Integer stockQuantity,
             @RequestParam(value = "isFeatured", defaultValue = "false") boolean isFeatured,
+            @RequestParam(value = "imagePath", required = false) String existingImagePath,
             @RequestParam(value = "image", required = false) MultipartFile image) {
         try {
-            String imagePath = null;
+            String imagePath = existingImagePath;
             if (image != null && !image.isEmpty()) {
                 imagePath = fileStorageService.storeFile(image, "products");
             }
 
             Product product = Product.builder()
-                    .name(name)
-                    .productCode(productCode)
+                    .name(name != null ? name.trim() : "")
+                    .productCode(productCode != null ? productCode.trim() : "")
                     .category(Category.builder().id(categoryId).build())
                     .description(description)
                     .originalPrice(originalPrice)
@@ -88,16 +89,17 @@ public class ProductController {
             @RequestParam("offerPrice") Double offerPrice,
             @RequestParam("stockQuantity") Integer stockQuantity,
             @RequestParam("isFeatured") boolean isFeatured,
+            @RequestParam(value = "imagePath", required = false) String existingImagePath,
             @RequestParam(value = "image", required = false) MultipartFile image) {
         try {
-            String imagePath = null;
+            String imagePath = existingImagePath;
             if (image != null && !image.isEmpty()) {
                 imagePath = fileStorageService.storeFile(image, "products");
             }
 
             Product updated = Product.builder()
-                    .name(name)
-                    .productCode(productCode)
+                    .name(name != null ? name.trim() : "")
+                    .productCode(productCode != null ? productCode.trim() : "")
                     .category(Category.builder().id(categoryId).build())
                     .description(description)
                     .originalPrice(originalPrice)

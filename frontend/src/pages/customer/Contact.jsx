@@ -7,10 +7,10 @@ export default function Contact() {
     shop_name: 'AVIRA PYROTECH',
     phone_number: '8610315901, 9092180927',
     whatsapp_number: '8610315901',
-    email: '',
-    address: '',
-    google_maps_link: '',
-    business_hours: ''
+    email: 'info@avirapyrotech.com',
+    address: '112, Paraipatti, Sattur Road, Sivakasi - 626189',
+    google_maps_link: 'https://www.google.com/maps/search/?api=1&query=112+Paraipatti+Sattur+Road+Sivakasi+626189',
+    business_hours: '9:00 AM - 8:00 PM'
   });
 
   const fetchContactSettings = async () => {
@@ -130,7 +130,7 @@ export default function Contact() {
                 <div>
                   <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Store Address</h4>
                   <p className="text-xs font-semibold text-gray-650 leading-relaxed mt-1">
-                    {settings.address || 'AVIRA PYROTECH Store, Sivakasi, Tamil Nadu, India.'}
+                    {settings.address || '112, Paraipatti, Sattur Road, Sivakasi - 626189.'}
                   </p>
                 </div>
               </div>
@@ -141,7 +141,7 @@ export default function Contact() {
                     href={settings.google_maps_link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-750 transition-all shadow-sm shadow-red-500/10"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-750 transition-all shadow-sm shadow-red-500/10 cursor-pointer"
                   >
                     <MapPin size={12} />
                     <span>Open in Google Maps</span>
@@ -150,15 +150,18 @@ export default function Contact() {
               )}
             </div>
 
-            {/* Embedded Iframe fallback or link representation */}
-            <div className="w-full h-52 bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden flex items-center justify-center text-center p-6 text-gray-400">
-              <div className="space-y-2">
-                <MapPin className="mx-auto text-gray-300" size={32} />
-                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Google Map Location</p>
-                <p className="text-[10px] font-semibold text-gray-400 max-w-xs leading-relaxed">
-                  Click the button above to navigate to our shop location coordinates directly on Google Maps.
-                </p>
-              </div>
+            {/* Embedded Interactive Google Map */}
+            <div className="w-full h-56 bg-gray-100 border border-gray-200 rounded-2xl overflow-hidden shadow-inner relative">
+              <iframe
+                title="Avira Pyrotech Shop Location"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(settings.address || '112, Paraipatti, Sattur Road, Sivakasi - 626189')}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+              />
             </div>
           </div>
         </div>
