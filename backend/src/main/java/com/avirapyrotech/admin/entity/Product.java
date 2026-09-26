@@ -29,10 +29,10 @@ public class Product {
     private Double offerPrice;
 
     @Column(name = "stock_quantity", nullable = false)
-    private Integer stockQuantity;
+    private Integer stockQuantity = 999;
 
     @Column(nullable = false)
-    private String status; // Available / Out of Stock
+    private String status = "Available"; // Available / Out of Stock
 
     @Column(name = "is_featured", nullable = false)
     private boolean isFeatured;

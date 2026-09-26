@@ -77,8 +77,15 @@ public class ProductService {
             product.setCategory(category);
         }
         
+        // Ensure default stock quantity if not provided
+        if (product.getStockQuantity() == null) {
+            product.setStockQuantity(999);
+        }
+
         // Set stock status automatically if out of stock
-        updateStatusBasedOnStock(product);
+        if (product.getStatus() == null || product.getStatus().isBlank()) {
+            updateStatusBasedOnStock(product);
+        }
         
         return productRepository.save(product);
     }
@@ -97,7 +104,9 @@ public class ProductService {
         product.setDescription(updatedProduct.getDescription());
         product.setOriginalPrice(updatedProduct.getOriginalPrice());
         product.setOfferPrice(updatedProduct.getOfferPrice());
-        product.setStockQuantity(updatedProduct.getStockQuantity());
+        if (updatedProduct.getStockQuantity() != null) {
+            product.setStockQuantity(updatedProduct.getStockQuantity());
+        }
         product.setFeatured(updatedProduct.isFeatured());
         
         if (updatedProduct.getCategory() != null && updatedProduct.getCategory().getId() != null) {
@@ -117,7 +126,11 @@ public class ProductService {
             product.setImagePath(updatedProduct.getImagePath());
         }
 
-        updateStatusBasedOnStock(product);
+        if (updatedProduct.getStatus() != null && !updatedProduct.getStatus().isBlank()) {
+            product.setStatus(updatedProduct.getStatus());
+        } else {
+            updateStatusBasedOnStock(product);
+        }
 
         return productRepository.save(product);
     }
@@ -165,7 +178,10 @@ public class ProductService {
     }
 
     private void updateStatusBasedOnStock(Product product) {
-        if (product.getStockQuantity() <= 0) {
+        if (product.getStatus() != null && !product.getStatus().isBlank()) {
+            return;
+        }
+        if (product.getStockQuantity() != null && product.getStockQuantity() <= 0) {
             product.setStatus("Out of Stock");
         } else {
             product.setStatus("Available");

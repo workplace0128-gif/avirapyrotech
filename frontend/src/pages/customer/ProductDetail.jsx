@@ -146,7 +146,7 @@ export default function ProductDetail() {
                 : 'bg-green-50 text-green-700 border-green-200'
             }`}>
               <span className={`w-1.5 h-1.5 rounded-full ${isOutOfStock ? 'bg-red-500' : 'bg-green-500'}`}></span>
-              <span>{isOutOfStock ? 'Out of Stock' : `In Stock: ${product.stockQuantity} items left`}</span>
+              <span>{isOutOfStock ? 'Out of Stock' : 'In Stock'}</span>
             </span>
           </div>
 

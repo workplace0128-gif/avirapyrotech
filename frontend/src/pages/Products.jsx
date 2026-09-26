@@ -40,7 +40,7 @@ export default function Products() {
   const [description, setDescription] = useState('');
   const [originalPrice, setOriginalPrice] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
-  const [stockQuantity, setStockQuantity] = useState('');
+  const [status, setStatus] = useState('Available');
   const [isFeatured, setIsFeatured] = useState(false);
   
   // Image Upload States
@@ -132,7 +132,7 @@ export default function Products() {
     setDescription('');
     setOriginalPrice('');
     setOfferPrice('');
-    setStockQuantity('');
+    setStatus('Available');
     setIsFeatured(false);
     setImageFile(null);
     setImagePreview('');
@@ -150,7 +150,7 @@ export default function Products() {
     setDescription(product.description || '');
     setOriginalPrice(product.originalPrice);
     setOfferPrice(product.offerPrice);
-    setStockQuantity(product.stockQuantity);
+    setStatus(product.status || 'Available');
     setIsFeatured(product.isFeatured);
     setImageFile(null);
     setImagePreview('');
@@ -221,8 +221,8 @@ export default function Products() {
     e.preventDefault();
     setFormError('');
 
-    // Valider details
-    if (!name.trim() || !productCode.trim() || !categoryId || originalPrice === '' || offerPrice === '' || stockQuantity === '') {
+    // Validate details
+    if (!name.trim() || !productCode.trim() || !categoryId || originalPrice === '' || offerPrice === '') {
       setFormError('Please fill in all required fields marked with *');
       return;
     }
@@ -242,7 +242,8 @@ export default function Products() {
       formData.append('description', description);
       formData.append('originalPrice', originalPrice);
       formData.append('offerPrice', offerPrice);
-      formData.append('stockQuantity', stockQuantity);
+      formData.append('stockQuantity', status === 'Out of Stock' ? 0 : 999);
+      formData.append('status', status);
       formData.append('isFeatured', isFeatured);
       
       if (imageFile) {
@@ -283,12 +284,16 @@ export default function Products() {
       const formData = new FormData();
       formData.append('name', product.name);
       formData.append('productCode', product.productCode);
-      formData.append('categoryId', product.category.id);
+      formData.append('categoryId', product.category?.id);
       formData.append('description', product.description || '');
       formData.append('originalPrice', product.originalPrice);
       formData.append('offerPrice', product.offerPrice);
-      formData.append('stockQuantity', product.stockQuantity);
+      formData.append('stockQuantity', product.stockQuantity ?? (product.status === 'Out of Stock' ? 0 : 999));
+      formData.append('status', product.status || 'Available');
       formData.append('isFeatured', !product.isFeatured);
+      if (product.imagePath) {
+        formData.append('imagePath', product.imagePath);
+      }
       
       await api.put(`/products/${product.id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -296,6 +301,33 @@ export default function Products() {
       fetchProducts();
     } catch (err) {
       alert("Failed to toggle status");
+    }
+  };
+
+  // Toggle Available / Out of Stock status directly
+  const toggleStatusDirectly = async (product) => {
+    try {
+      const nextStatus = product.status === 'Available' ? 'Out of Stock' : 'Available';
+      const formData = new FormData();
+      formData.append('name', product.name);
+      formData.append('productCode', product.productCode);
+      formData.append('categoryId', product.category?.id);
+      formData.append('description', product.description || '');
+      formData.append('originalPrice', product.originalPrice);
+      formData.append('offerPrice', product.offerPrice);
+      formData.append('stockQuantity', nextStatus === 'Out of Stock' ? 0 : 999);
+      formData.append('status', nextStatus);
+      formData.append('isFeatured', product.isFeatured);
+      if (product.imagePath) {
+        formData.append('imagePath', product.imagePath);
+      }
+      
+      await api.put(`/products/${product.id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      fetchProducts();
+    } catch (err) {
+      alert("Failed to toggle product status");
     }
   };
 
@@ -381,7 +413,6 @@ export default function Products() {
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400">Code</th>
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400">Category</th>
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400">Price (Original / Offer)</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400">Stock</th>
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400">Status</th>
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400">Featured</th>
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 text-right">Actions</th>
@@ -426,20 +457,20 @@ export default function Products() {
                       </div>
                     </td>
 
-                    {/* Stock */}
-                    <td className="px-6 py-4 text-sm font-extrabold text-gray-800">
-                      {product.stockQuantity}
-                    </td>
-
                     {/* Status Badge */}
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 text-xs font-bold border rounded-full ${
-                        product.status === 'Available'
-                          ? 'bg-green-50 text-green-700 border-green-200'
-                          : 'bg-red-50 text-red-700 border-red-200'
-                      }`}>
-                        {product.status}
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => toggleStatusDirectly(product)}
+                        className={`px-2.5 py-1 text-xs font-bold border rounded-full transition-all cursor-pointer hover:opacity-80 ${
+                          product.status === 'Available'
+                            ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
+                            : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+                        }`}
+                        title="Click to toggle status (Available / Out of Stock)"
+                      >
+                        {product.status || 'Available'}
+                      </button>
                     </td>
 
                     {/* Featured Toggle */}
@@ -605,7 +636,7 @@ export default function Products() {
                 </div>
               </div>
 
-              {/* Grid 3: Pricing and Stocks */}
+              {/* Grid 3: Pricing & Status */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
@@ -641,17 +672,16 @@ export default function Products() {
 
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                    Stock Quantity *
+                    Status
                   </label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    placeholder="e.g. 150"
-                    value={stockQuantity}
-                    onChange={(e) => setStockQuantity(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-850 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 text-sm font-medium"
-                  />
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-850 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 text-sm font-medium cursor-pointer"
+                  >
+                    <option value="Available">Available</option>
+                    <option value="Out of Stock">Out of Stock</option>
+                  </select>
                 </div>
               </div>
 
