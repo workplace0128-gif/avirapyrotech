@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.UUID;
@@ -27,7 +28,7 @@ public class FileStorageService {
 
     private final Path fileStorageLocation;
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-    private static final String[] SUPPORTED_EXTENSIONS = {"jpg", "jpeg", "png", "webp"};
+    private static final String[] SUPPORTED_EXTENSIONS = {"jpg", "jpeg", "png", "webp", "gif"};
 
     public FileStorageService(@Value("${app.upload.dir:./uploads}") String uploadDir) {
         Path path = Paths.get(uploadDir);
@@ -59,28 +60,56 @@ public class FileStorageService {
         }
 
         String fileExtension = getFileExtension(originalFileName).toLowerCase();
-        if (Arrays.stream(SUPPORTED_EXTENSIONS).noneMatch(ext -> ext.equals(fileExtension))) {
-            throw new IllegalArgumentException("Unsupported file type. Only JPG, JPEG, PNG, and WEBP are supported.");
+        if ("jpeg".equals(fileExtension)) {
+            fileExtension = "jpg";
         }
 
-        // Generate unique name
-        String targetFileName = UUID.randomUUID().toString() + ".jpg"; // Normalize output to jpg for maximum compatibility and compression
-        Path targetLocation = this.fileStorageLocation.resolve(subFolder).resolve(targetFileName);
+        final String finalExt = fileExtension;
+        if (Arrays.stream(SUPPORTED_EXTENSIONS).noneMatch(ext -> ext.equals(finalExt) || ("jpeg".equals(ext) && "jpg".equals(finalExt)))) {
+            throw new IllegalArgumentException("Unsupported file type. Only JPG, JPEG, PNG, WEBP, and GIF are supported.");
+        }
 
+        // WebP and GIF: standard Java ImageIO does not have a built-in WebP/animated GIF writer
+        // Directly save them to disk preserving their native format
+        if ("webp".equals(fileExtension) || "gif".equals(fileExtension)) {
+            return saveRawFile(file, subFolder, fileExtension);
+        }
+
+        // For JPG / PNG: attempt to optimize and resize
         try {
-            // Resize and optimize image
             BufferedImage originalImage = ImageIO.read(file.getInputStream());
-            if (originalImage == null) {
-                throw new IllegalArgumentException("Could not read image data");
+            if (originalImage != null) {
+                String targetFileName = UUID.randomUUID().toString() + "." + fileExtension;
+                Path targetLocation = this.fileStorageLocation.resolve(subFolder).resolve(targetFileName);
+
+                if ("png".equals(fileExtension)) {
+                    boolean hasAlpha = originalImage.getColorModel().hasAlpha();
+                    BufferedImage resizedImage = resizeImage(originalImage, 1000, hasAlpha);
+                    ImageIO.write(resizedImage, "png", targetLocation.toFile());
+                } else {
+                    BufferedImage resizedImage = resizeImage(originalImage, 1000, false);
+                    writeCompressedImage(resizedImage, targetLocation.toFile(), 0.80f);
+                }
+
+                return "/api/uploads/" + subFolder + "/" + targetFileName;
             }
+        } catch (Exception ex) {
+            System.err.println("Warning: Image optimization skipped for " + originalFileName + ": " + ex.getMessage());
+        }
 
-            BufferedImage resizedImage = resizeImage(originalImage, 1000); // Limit width to 1000px
-            writeCompressedImage(resizedImage, targetLocation.toFile(), 0.75f); // 75% quality JPEG
+        // Graceful fallback: If ImageIO returned null or failed (e.g. CMYK colorspace, special metadata),
+        // save the original file directly so the user NEVER receives 'Could not read image data'
+        return saveRawFile(file, subFolder, fileExtension);
+    }
 
-            // Return the relative URL path (web-accessible)
+    private String saveRawFile(MultipartFile file, String subFolder, String fileExtension) {
+        String targetFileName = UUID.randomUUID().toString() + "." + fileExtension;
+        Path targetLocation = this.fileStorageLocation.resolve(subFolder).resolve(targetFileName);
+        try {
+            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
             return "/api/uploads/" + subFolder + "/" + targetFileName;
-        } catch (IOException ex) {
-            throw new RuntimeException("Failed to store and optimize file: " + originalFileName, ex);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store file: " + file.getOriginalFilename(), e);
         }
     }
 
@@ -107,7 +136,7 @@ public class FileStorageService {
         return fileName.substring(lastIndexOf + 1);
     }
 
-    private BufferedImage resizeImage(BufferedImage originalImage, int maxTargetWidth) {
+    private BufferedImage resizeImage(BufferedImage originalImage, int maxTargetWidth, boolean hasAlpha) {
         int width = originalImage.getWidth();
         int height = originalImage.getHeight();
 
@@ -116,8 +145,9 @@ public class FileStorageService {
         }
 
         int targetHeight = (int) (((double) height / width) * maxTargetWidth);
+        int imageType = hasAlpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
         
-        BufferedImage resizedImage = new BufferedImage(maxTargetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
+        BufferedImage resizedImage = new BufferedImage(maxTargetWidth, targetHeight, imageType);
         Graphics2D g2d = resizedImage.createGraphics();
         
         // Use high-quality rendering hints
@@ -125,6 +155,11 @@ public class FileStorageService {
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         
+        if (!hasAlpha) {
+            g2d.setColor(Color.WHITE);
+            g2d.fillRect(0, 0, maxTargetWidth, targetHeight);
+        }
+
         g2d.drawImage(originalImage, 0, 0, maxTargetWidth, targetHeight, null);
         g2d.dispose();
         
