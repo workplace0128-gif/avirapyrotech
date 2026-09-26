@@ -81,9 +81,10 @@ public class FileStorageService {
             if (originalImage != null) {
                 String targetFileName = UUID.randomUUID().toString() + "." + fileExtension;
                 Path targetLocation = this.fileStorageLocation.resolve(subFolder).resolve(targetFileName);
+                Files.createDirectories(targetLocation.getParent());
 
                 if ("png".equals(fileExtension)) {
-                    boolean hasAlpha = originalImage.getColorModel().hasAlpha();
+                    boolean hasAlpha = originalImage.getColorModel() != null && originalImage.getColorModel().hasAlpha();
                     BufferedImage resizedImage = resizeImage(originalImage, 1000, hasAlpha);
                     ImageIO.write(resizedImage, "png", targetLocation.toFile());
                 } else {
@@ -93,11 +94,11 @@ public class FileStorageService {
 
                 return "/api/uploads/" + subFolder + "/" + targetFileName;
             }
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             System.err.println("Warning: Image optimization skipped for " + originalFileName + ": " + ex.getMessage());
         }
 
-        // Graceful fallback: If ImageIO returned null or failed (e.g. CMYK colorspace, special metadata),
+        // Graceful fallback: If ImageIO returned null or failed (e.g. CMYK colorspace, special metadata, WebP, etc.),
         // save the original file directly so the user NEVER receives 'Could not read image data'
         return saveRawFile(file, subFolder, fileExtension);
     }
@@ -106,6 +107,7 @@ public class FileStorageService {
         String targetFileName = UUID.randomUUID().toString() + "." + fileExtension;
         Path targetLocation = this.fileStorageLocation.resolve(subFolder).resolve(targetFileName);
         try {
+            Files.createDirectories(targetLocation.getParent());
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
             return "/api/uploads/" + subFolder + "/" + targetFileName;
         } catch (IOException e) {
@@ -169,7 +171,8 @@ public class FileStorageService {
     private void writeCompressedImage(BufferedImage image, File targetFile, float quality) throws IOException {
         Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
         if (!writers.hasNext()) {
-            throw new IllegalStateException("No JPG image writer available");
+            ImageIO.write(image, "jpg", targetFile);
+            return;
         }
         ImageWriter writer = writers.next();
         
@@ -181,11 +184,12 @@ public class FileStorageService {
             
             if (param.canWriteCompressed()) {
                 param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-                param.setCompressionType(param.getCompressionTypes()[0]);
                 param.setCompressionQuality(quality);
             }
             
             writer.write(null, new IIOImage(image, null, null), param);
+        } catch (Exception e) {
+            ImageIO.write(image, "jpg", targetFile);
         } finally {
             writer.dispose();
         }
