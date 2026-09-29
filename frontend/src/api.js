@@ -23,6 +23,11 @@ api.interceptors.request.use(
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
+    // If request payload is FormData, remove default Content-Type so Axios/browser
+    // automatically appends multipart/form-data WITH the correct boundary parameter
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
     return config;
   },
   (error) => {
@@ -30,17 +35,16 @@ api.interceptors.request.use(
   }
 );
 
-// Response Interceptor: Global 401 & 403 handling + timeout messaging
+// Response Interceptor: Global 401 handling + timeout messaging
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      // Clear token and redirect to login if session expired or unauthorized
-      localStorage.removeItem('token');
-      localStorage.removeItem('username');
-      
-      // If we aren't already on the login page, redirect
-      if (!window.location.pathname.includes('/admin/login')) {
+    if (error.response && error.response.status === 401) {
+      const isLoginRequest = error.config?.url?.includes('/auth/login');
+      // Clear token and redirect to login if session expired or unauthorized on protected routes
+      if (!isLoginRequest && !window.location.pathname.includes('/admin/login')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
         window.location.href = '/admin/login?expired=true';
       }
     }

@@ -80,7 +80,7 @@ public class ProductController {
         }
     }
 
-    @PutMapping("/{id}")
+    @RequestMapping(value = "/{id}", method = {RequestMethod.PUT, RequestMethod.POST})
     public ResponseEntity<?> updateProduct(
             @PathVariable Long id,
             @RequestParam("name") String name,
@@ -89,9 +89,9 @@ public class ProductController {
             @RequestParam(value = "description", required = false) String description,
             @RequestParam("originalPrice") Double originalPrice,
             @RequestParam("offerPrice") Double offerPrice,
-            @RequestParam(value = "stockQuantity", required = false) Integer stockQuantity,
-            @RequestParam(value = "status", required = false) String status,
-            @RequestParam("isFeatured") boolean isFeatured,
+            @RequestParam(value = "stockQuantity", required = false, defaultValue = "999") Integer stockQuantity,
+            @RequestParam(value = "status", required = false, defaultValue = "Available") String status,
+            @RequestParam(value = "isFeatured", required = false, defaultValue = "false") boolean isFeatured,
             @RequestParam(value = "imagePath", required = false) String existingImagePath,
             @RequestParam(value = "image", required = false) MultipartFile image) {
         try {
@@ -107,8 +107,8 @@ public class ProductController {
                     .description(description)
                     .originalPrice(originalPrice)
                     .offerPrice(offerPrice)
-                    .stockQuantity(stockQuantity)
-                    .status(status)
+                    .stockQuantity(stockQuantity != null ? stockQuantity : 999)
+                    .status(status != null && !status.isBlank() ? status : "Available")
                     .isFeatured(isFeatured)
                     .imagePath(imagePath)
                     .build();

@@ -115,13 +115,9 @@ export default function Banners() {
       }
 
       if (editBannerId) {
-        await api.put(`/banners/${editBannerId}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.put(`/banners/${editBannerId}`, formData);
       } else {
-        await api.post('/banners', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.post('/banners', formData);
       }
 
       setModalOpen(false);
@@ -155,9 +151,7 @@ export default function Banners() {
       formData.append('orderIndex', banner.orderIndex);
       formData.append('isActive', !banner.active);
       
-      await api.put(`/banners/${banner.id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await api.put(`/banners/${banner.id}`, formData);
       fetchBanners();
     } catch (err) {
       alert("Failed to toggle status");

@@ -103,13 +103,9 @@ export default function Categories() {
       }
 
       if (editCategoryId) {
-        await api.put(`/categories/${editCategoryId}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.put(`/categories/${editCategoryId}`, formData);
       } else {
-        await api.post('/categories', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.post('/categories', formData);
       }
 
       setModalOpen(false);

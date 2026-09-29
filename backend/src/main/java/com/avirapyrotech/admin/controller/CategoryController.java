@@ -53,7 +53,7 @@ public class CategoryController {
         }
     }
 
-    @PutMapping("/{id}")
+    @RequestMapping(value = "/{id}", method = {RequestMethod.PUT, RequestMethod.POST})
     public ResponseEntity<?> updateCategory(
             @PathVariable Long id,
             @RequestParam("name") String name,

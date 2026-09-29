@@ -144,14 +144,14 @@ export default function Products() {
   // Open modal for Edit
   const openEditModal = (product) => {
     setEditProductId(product.id);
-    setName(product.name);
-    setProductCode(product.productCode);
-    setCategoryId(product.category.id);
+    setName(product.name || '');
+    setProductCode(product.productCode || '');
+    setCategoryId(product.category?.id || '');
     setDescription(product.description || '');
-    setOriginalPrice(product.originalPrice);
-    setOfferPrice(product.offerPrice);
+    setOriginalPrice(product.originalPrice !== undefined && product.originalPrice !== null ? product.originalPrice : '');
+    setOfferPrice(product.offerPrice !== undefined && product.offerPrice !== null ? product.offerPrice : '');
     setStatus(product.status || 'Available');
-    setIsFeatured(product.isFeatured);
+    setIsFeatured(!!product.isFeatured);
     setImageFile(null);
     setImagePreview('');
     setExistingImagePath(product.imagePath || '');
@@ -255,14 +255,10 @@ export default function Products() {
 
       if (editProductId) {
         // Edit mode
-        await api.put(`/products/${editProductId}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.put(`/products/${editProductId}`, formData);
       } else {
         // Create mode
-        await api.post('/products', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.post('/products', formData);
       }
 
       setModalOpen(false);
@@ -295,9 +291,7 @@ export default function Products() {
         formData.append('imagePath', product.imagePath);
       }
       
-      await api.put(`/products/${product.id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await api.put(`/products/${product.id}`, formData);
       fetchProducts();
     } catch (err) {
       alert("Failed to toggle status");
@@ -322,9 +316,7 @@ export default function Products() {
         formData.append('imagePath', product.imagePath);
       }
       
-      await api.put(`/products/${product.id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await api.put(`/products/${product.id}`, formData);
       fetchProducts();
     } catch (err) {
       alert("Failed to toggle product status");

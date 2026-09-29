@@ -65,7 +65,7 @@ public class BannerController {
         }
     }
 
-    @PutMapping("/{id}")
+    @RequestMapping(value = "/{id}", method = {RequestMethod.PUT, RequestMethod.POST})
     public ResponseEntity<?> updateBanner(
             @PathVariable Long id,
             @RequestParam(value = "title", required = false) String title,
