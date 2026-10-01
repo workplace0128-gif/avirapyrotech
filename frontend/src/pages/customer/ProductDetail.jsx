@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api, { getImageUrl } from '../../api';
 import { Flame, ShoppingCart, ArrowLeft, Plus, Minus, Info } from 'lucide-react';
+import CrackerBlast from '../../components/customer/CrackerBlast';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -104,20 +105,21 @@ export default function ProductDetail() {
       {/* Details Card */}
       <div className="bg-white rounded-3xl border border-gray-150 p-6 md:p-8 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
         
-        {/* Left: Product Image */}
-        <div className="bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-center p-6 min-h-[300px] md:min-h-[400px] relative overflow-hidden">
+        {/* Left: Product Image with Cracker Blast on hover */}
+        <div className="bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-center p-6 min-h-[300px] md:min-h-[400px] relative overflow-hidden group">
+          <CrackerBlast />
           {product.imagePath ? (
             <img
               src={getImageUrl(product.imagePath)}
               alt={product.name}
-              className="max-h-[350px] object-contain rounded-xl select-none"
+              className="max-h-[350px] object-contain rounded-xl select-none group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
-            <Flame className="text-gray-300" size={64} />
+            <Flame className="text-gray-300 group-hover:scale-110 transition-transform duration-300" size={64} />
           )}
 
           {discount > 0 && (
-            <span className="absolute top-4 left-4 bg-red-600 text-white text-xs font-black py-1 px-3 rounded-lg shadow-sm">
+            <span className="absolute top-4 left-4 bg-red-600 text-white text-xs font-black py-1 px-3 rounded-lg shadow-sm z-30">
               {discount}% DISCOUNT
             </span>
           )}
